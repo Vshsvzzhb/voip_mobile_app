@@ -95,11 +95,11 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ],
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.phone_in_talk_rounded,
-                      size: 52,
-                      color: AppColors.primary,
+                  child: Center(
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 64,
+                      height: 64,
                     ),
                   ),
                 ),
@@ -127,10 +127,11 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Komunikasi tanpa batas',
+                      'RELIABLE FLUIDITY',
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 2,
                         color: Colors.white.withOpacity(0.85),
                       ),
                     ),

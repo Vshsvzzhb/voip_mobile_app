@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../screens/splash/splash_screen.dart';
 import '../../screens/onboarding/onboarding_screen.dart';
@@ -41,11 +42,41 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: '/login',
-      builder: (context, state) => const LoginScreen(),
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const LoginScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: animation.drive(Tween(
+              begin: const Offset(-0.3, 0.0),
+              end: Offset.zero,
+            ).chain(CurveTween(curve: Curves.easeOutCubic))),
+            child: FadeTransition(
+              opacity: animation.drive(CurveTween(curve: Curves.easeIn)),
+              child: child,
+            ),
+          );
+        },
+      ),
     ),
     GoRoute(
       path: '/register',
-      builder: (context, state) => const RegisterScreen(),
+      pageBuilder: (context, state) => CustomTransitionPage(
+        key: state.pageKey,
+        child: const RegisterScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: animation.drive(Tween(
+              begin: const Offset(0.3, 0.0),
+              end: Offset.zero,
+            ).chain(CurveTween(curve: Curves.easeOutCubic))),
+            child: FadeTransition(
+              opacity: animation.drive(CurveTween(curve: Curves.easeIn)),
+              child: child,
+            ),
+          );
+        },
+      ),
     ),
     GoRoute(
       path: '/otp',

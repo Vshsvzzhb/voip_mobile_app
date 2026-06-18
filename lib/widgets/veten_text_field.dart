@@ -46,64 +46,80 @@ class _VetenTextFieldState extends State<VetenTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: widget.controller,
-      keyboardType: widget.keyboardType,
-      obscureText: widget.obscureText ? _obscure : false,
-      validator: widget.validator,
-      onChanged: widget.onChanged,
-      maxLines: widget.obscureText ? 1 : widget.maxLines,
-      readOnly: widget.readOnly,
-      style: GoogleFonts.plusJakartaSans(
-        fontSize: 15,
-        fontWeight: FontWeight.w400,
-        color: AppColors.onBackground,
-      ),
-      decoration: InputDecoration(
-        labelText: widget.label,
-        hintText: widget.hint,
-        prefixIcon: widget.prefix,
-        suffixIcon: widget.obscureText
-            ? IconButton(
-                icon: Icon(
-                  _obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,
-                  color: AppColors.onSurfaceVariant,
-                  size: 20,
-                ),
-                onPressed: () => setState(() => _obscure = !_obscure),
-              )
-            : widget.suffix,
-        filled: true,
-        fillColor: AppColors.surfaceContainerLow,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: 15,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.label != null) ...[
+          Text(
+            widget.label!,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.onBackground,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        TextFormField(
+          controller: widget.controller,
+          keyboardType: widget.keyboardType,
+          obscureText: widget.obscureText ? _obscure : false,
+          validator: widget.validator,
+          onChanged: widget.onChanged,
+          maxLines: widget.obscureText ? 1 : widget.maxLines,
+          readOnly: widget.readOnly,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.onBackground,
+          ),
+          decoration: InputDecoration(
+            hintText: widget.hint,
+            prefixIcon: widget.prefix,
+            suffixIcon: widget.obscureText
+                ? IconButton(
+                    icon: Icon(
+                      _obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                      color: AppColors.onSurfaceVariant,
+                      size: 20,
+                    ),
+                    onPressed: () => setState(() => _obscure = !_obscure),
+                  )
+                : widget.suffix,
+            filled: true,
+            fillColor: AppColors.surfaceContainerLow,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: 16,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: BorderSide.none,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: const BorderSide(color: AppColors.error, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+            ),
+            hintStyle: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: AppColors.onSurfaceVariant.withOpacity(0.6),
+            ),
+          ),
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          borderSide: const BorderSide(color: AppColors.outlineVariant),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          borderSide: const BorderSide(color: AppColors.outlineVariant, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          borderSide: const BorderSide(color: AppColors.error, width: 1),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
-        ),
-        hintStyle: GoogleFonts.plusJakartaSans(
-          fontSize: 15,
-          color: AppColors.onSurfaceVariant.withOpacity(0.6),
-        ),
-      ),
+      ],
     );
   }
 }

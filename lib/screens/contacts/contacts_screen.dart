@@ -4,6 +4,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../data/dummy_data.dart';
 import '../../widgets/veten_avatar.dart';
+import '../../widgets/veten_button.dart';
+import '../../widgets/veten_text_field.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ContactsScreen extends StatefulWidget {
@@ -15,6 +17,68 @@ class ContactsScreen extends StatefulWidget {
 
 class _ContactsScreenState extends State<ContactsScreen> {
   String _search = '';
+
+  void _showAddContactForm(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusXl)),
+        ),
+        padding: EdgeInsets.only(
+          left: AppSpacing.xl,
+          right: AppSpacing.xl,
+          top: AppSpacing.xl,
+          bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.xl,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Tambah Kontak Baru',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.onBackground,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            const VetenTextField(
+              label: 'Nama Lengkap',
+              hint: 'Masukkan nama kontak',
+            ),
+            const SizedBox(height: AppSpacing.md),
+            const VetenTextField(
+              label: 'Nomor Telepon',
+              hint: '+62 8xx xxxx xxxx',
+              keyboardType: TextInputType.phone,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            VetenButton(
+              label: 'Simpan Kontak',
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Kontak berhasil ditambahkan!',
+                      style: GoogleFonts.plusJakartaSans(),
+                    ),
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: AppColors.primary,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,14 +99,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
           ),
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.person_add_rounded), onPressed: () {}),
+          IconButton(icon: const Icon(Icons.person_add_rounded), onPressed: () => _showAddContactForm(context)),
           IconButton(icon: const Icon(Icons.more_vert_rounded), onPressed: () {}),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.push('/select-members'),
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.group_add_rounded, color: Colors.white),
       ),
       body: Column(
         children: [
@@ -77,7 +136,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   icon: Icons.person_add_rounded,
                   label: 'Tambah Kontak',
                   color: AppColors.primary,
-                  onTap: () {},
+                  onTap: () => _showAddContactForm(context),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 _QuickAction(

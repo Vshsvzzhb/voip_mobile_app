@@ -22,7 +22,27 @@ class MainShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final idx = _currentIndex(context);
     return Scaffold(
-      body: child,
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeIn,
+        transitionBuilder: (child, animation) {
+          return SlideTransition(
+            position: animation.drive(Tween(
+              begin: const Offset(0.05, 0.0),
+              end: Offset.zero,
+            )),
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          );
+        },
+        child: Container(
+          key: ValueKey<int>(idx),
+          child: child,
+        ),
+      ),
       bottomNavigationBar: Container(
         margin: const EdgeInsets.fromLTRB(
           AppSpacing.md, 0, AppSpacing.md, AppSpacing.md,

@@ -18,22 +18,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final _pages = const [
     _OnboardingData(
-      icon: Icons.chat_bubble_outline_rounded,
-      color: AppColors.primary,
-      title: 'Chat Tanpa Batas',
-      subtitle: 'Kirim pesan teks, foto, dan dokumen kepada siapa saja di seluruh dunia dengan cepat dan aman.',
+      imagePath: 'assets/images/screen_1.png',
+      title: 'Telepon & Video Call Jernih',
+      subtitle: 'Nikmati kualitas suara dan video HD tanpa hambatan untuk pengalaman komunikasi yang lebih nyata.',
     ),
     _OnboardingData(
-      icon: Icons.video_call_rounded,
-      color: AppColors.secondary,
-      title: 'Video Call HD',
-      subtitle: 'Nikmati panggilan video berkualitas tinggi satu-satu atau grup bersama teman dan keluarga.',
+      imagePath: 'assets/images/screen_2.png',
+      title: 'Ngobrol Tanpa Batas',
+      subtitle: 'Tetap terhubung dengan teman dan keluarga kapan saja melalui pesan teks yang aman dan cepat.',
     ),
     _OnboardingData(
-      icon: Icons.record_voice_over_rounded,
-      color: AppColors.tertiary,
-      title: 'Text-to-Speech',
-      subtitle: 'Fitur TTS canggih membantu membaca pesan chat agar komunikasi lebih mudah dan inklusif.',
+      imagePath: 'assets/images/screen_3.png',
+      title: 'Didengar, Bukan Hanya Dibaca',
+      subtitle: 'Fitur Text-to-Speech kami memastikan pesan Anda dapat didengar, memberikan aksesibilitas bagi semua orang.',
     ),
   ];
 
@@ -127,14 +124,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 }
 
 class _OnboardingData {
-  final IconData icon;
-  final Color color;
+  final String imagePath;
   final String title;
   final String subtitle;
 
   const _OnboardingData({
-    required this.icon,
-    required this.color,
+    required this.imagePath,
     required this.title,
     required this.subtitle,
   });
@@ -152,24 +147,10 @@ class _PageContent extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 160,
-            height: 160,
-            decoration: BoxDecoration(
-              color: data.color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: data.color.withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(data.icon, size: 52, color: data.color),
-              ),
-            ),
+          Image.asset(
+            data.imagePath,
+            height: 260,
+            fit: BoxFit.contain,
           ),
           const SizedBox(height: AppSpacing.xl),
           Text(

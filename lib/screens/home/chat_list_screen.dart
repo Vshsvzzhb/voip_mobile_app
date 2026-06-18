@@ -58,7 +58,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
       ),
       body: Column(
         children: [
-          _buildStories(),
           Expanded(
             child: ListView.builder(
               itemCount: chats.length,
@@ -70,80 +69,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildStories() {
-    return SizedBox(
-      height: 90,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        itemCount: DummyData.contacts.length + 1,
-        itemBuilder: (context, i) {
-          if (i == 0) {
-            return Padding(
-              padding: const EdgeInsets.only(right: AppSpacing.md),
-              child: Column(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryFixed,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                          color: AppColors.primary.withOpacity(0.3), width: 2),
-                    ),
-                    child: const Icon(Icons.add_rounded,
-                        color: AppColors.primary, size: 24),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Status',
-                    style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11, color: AppColors.onSurfaceVariant),
-                  ),
-                ],
-              ),
-            );
-          }
-          final c = DummyData.contacts[i - 1];
-          return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.md),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: c.isOnline ? AppColors.primaryGradient : null,
-                    color: c.isOnline ? null : AppColors.surfaceContainer,
-                  ),
-                  child: VetenAvatar(
-                    name: c.name,
-                    imageUrl: c.avatarUrl,
-                    size: 48,
-                    isGroup: c.isGroup,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  c.name.split(' ').first,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    color: AppColors.onBackground,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
       ),
     );
   }
