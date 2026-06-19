@@ -10,6 +10,8 @@ class VetenChatBubble extends StatelessWidget {
   final bool isRead;
   final bool isDelivered;
   final bool showTail;
+  final String? reaction;
+  final VoidCallback? onReactionTap;
 
   const VetenChatBubble({
     super.key,
@@ -19,6 +21,8 @@ class VetenChatBubble extends StatelessWidget {
     this.isRead = false,
     this.isDelivered = false,
     this.showTail = true,
+    this.reaction,
+    this.onReactionTap,
   });
 
   @override
@@ -34,66 +38,101 @@ class VetenChatBubble extends StatelessWidget {
           right: isOutgoing ? 0 : AppSpacing.xl,
           bottom: AppSpacing.xs,
         ),
-        child: CustomPaint(
-          painter: _BubblePainter(
-            isOutgoing: isOutgoing,
-            color: isOutgoing
-                ? AppColors.outgoingBubble
-                : AppColors.incomingBubble,
-            showTail: showTail,
-          ),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
-              AppSpacing.sm,
-              AppSpacing.md,
-              AppSpacing.sm,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  text,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15,
-                    height: 1.4,
-                    color: isOutgoing
-                        ? AppColors.outgoingBubbleText
-                        : AppColors.incomingBubbleText,
-                  ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            CustomPaint(
+              painter: _BubblePainter(
+                isOutgoing: isOutgoing,
+                color: isOutgoing
+                    ? AppColors.outgoingBubble
+                    : AppColors.incomingBubble,
+                showTail: showTail,
+              ),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.sm,
+                  AppSpacing.md,
+                  AppSpacing.sm,
                 ),
-                const SizedBox(height: 3),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      time,
+                      text,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
+                        fontSize: 15,
+                        height: 1.4,
                         color: isOutgoing
-                            ? Colors.white.withOpacity(0.7)
-                            : AppColors.onSurfaceVariant,
+                            ? AppColors.outgoingBubbleText
+                            : AppColors.incomingBubbleText,
                       ),
                     ),
-                    if (isOutgoing) ...[
-                      const SizedBox(width: 3),
-                      Icon(
-                        isRead
-                            ? Icons.done_all_rounded
-                            : isDelivered
+                    const SizedBox(height: 3),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          time,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            color: isOutgoing
+                                ? Colors.white.withOpacity(0.7)
+                                : AppColors.onSurfaceVariant,
+                          ),
+                        ),
+                        if (isOutgoing) ...[
+                          const SizedBox(width: 3),
+                          Icon(
+                            isRead
                                 ? Icons.done_all_rounded
-                                : Icons.done_rounded,
-                        size: 14,
-                        color: isRead
-                            ? Colors.lightBlue[200]
-                            : Colors.white.withOpacity(0.7),
-                      ),
-                    ],
+                                : isDelivered
+                                    ? Icons.done_all_rounded
+                                    : Icons.done_rounded,
+                            size: 14,
+                            color: isRead
+                                ? Colors.lightBlue[200]
+                                : Colors.white.withOpacity(0.7),
+                          ),
+                        ],
+                      ],
+                    ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
+            if (reaction != null)
+              Positioned(
+                bottom: -10,
+                right: isOutgoing ? null : 10,
+                left: isOutgoing ? 10 : null,
+                child: GestureDetector(
+                  onTap: onReactionTap,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      reaction!,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontFamilyFallback: ['Segoe UI Emoji', 'Noto Color Emoji', 'Apple Color Emoji'],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

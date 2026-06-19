@@ -7,6 +7,7 @@ import '../../data/dummy_data.dart';
 import '../../data/models/chat_model.dart';
 import '../../widgets/veten_avatar.dart';
 import '../../widgets/veten_chat_bubble.dart';
+import '../../widgets/chat_message_context_menu.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ChatRoomScreen extends StatefulWidget {
@@ -186,13 +187,32 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                       padding: EdgeInsets.only(
                         top: showTail ? AppSpacing.xs : 2,
                       ),
-                      child: VetenChatBubble(
-                        text: msg.text,
-                        isOutgoing: isMe,
-                        time: _formatTime(msg.time),
-                        isRead: msg.status == MessageStatus.read,
-                        isDelivered: msg.status == MessageStatus.delivered,
-                        showTail: showTail,
+                      child: GestureDetector(
+                        onLongPress: () {
+                          ChatMessageContextMenu.show(context, msg, (emoji) {
+                            setState(() {
+                              if (msg.reaction == emoji) {
+                                _messages[i] = msg.copyWith(clearReaction: true);
+                              } else {
+                                _messages[i] = msg.copyWith(reaction: emoji);
+                              }
+                            });
+                          });
+                        },
+                        child: VetenChatBubble(
+                          text: msg.text,
+                          isOutgoing: isMe,
+                          time: _formatTime(msg.time),
+                          isRead: msg.status == MessageStatus.read,
+                          isDelivered: msg.status == MessageStatus.delivered,
+                          showTail: showTail,
+                          reaction: msg.reaction,
+                          onReactionTap: () {
+                            setState(() {
+                              _messages[i] = msg.copyWith(clearReaction: true);
+                            });
+                          },
+                        ),
                       ),
                     ),
                   ],
@@ -223,7 +243,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
           IconButton(
             icon: const Icon(Icons.attach_file_rounded,
                 color: AppColors.onSurfaceVariant),
-            onPressed: () {},
+            onPressed: _showAttachmentMenu,
           ),
           Expanded(
             child: Container(
@@ -277,6 +297,101 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   ),
           ),
         ],
+      ),
+    );
+  }
+  void _showAttachmentMenu() {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.1),
+      builder: (context) {
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: Container(
+            margin: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              bottom: 84, // Jarak di atas input bar
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            decoration: BoxDecoration(
+              color: AppColors.surface, // Warna putih/surface yang bersih
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildAttachItem(Icons.photo_library_rounded, const Color(0xFF007BFF), 'Galeri'),
+                      _buildAttachItem(Icons.camera_alt_rounded, const Color(0xFFE91E63), 'Kamera'),
+                      _buildAttachItem(Icons.location_on_rounded, const Color(0xFF00C853), 'Lokasi'),
+                      _buildAttachItem(Icons.person_rounded, const Color(0xFF03A9F4), 'Kontak'),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildAttachItem(Icons.insert_drive_file_rounded, const Color(0xFF673AB7), 'Dokumen'),
+                      const SizedBox(width: 64), // Placeholder untuk menjaga jarak yang sama dengan baris atas
+                      const SizedBox(width: 64),
+                      const SizedBox(width: 64),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAttachItem(IconData icon, Color color, String label) {
+    return GestureDetector(
+      onTap: () {
+        context.pop(); // Tutup menu saat dipilih
+      },
+      child: SizedBox(
+        width: 64, // Memastikan lebar item seragam agar teks panjang tidak merusak layout
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: Colors.white, size: 26),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
