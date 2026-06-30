@@ -1,12 +1,15 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../widgets/veten_button.dart';
 import '../../widgets/veten_text_field.dart';
+import '../../core/services/sip_service.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -16,13 +19,13 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _phoneCtrl = TextEditingController(text: '+62');
+  final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _phoneCtrl.dispose();
+    _emailCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
   }
@@ -30,10 +33,27 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
+
+    // Gunakan SIP Username dan Password langsung ke Asterisk (Bypass API Node.js)
+    final sipService = Provider.of<SipService>(context, listen: false);
+    final success = await sipService.connect(
+      _emailCtrl.text.trim(),
+      _passCtrl.text,
+      '10.238.215.244',
+    );
+
     if (mounted) {
       setState(() => _isLoading = false);
-      context.go('/home');
+      if (success) {
+        context.go('/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Koneksi SIP gagal. Periksa Username/Password.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -129,11 +149,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: AppSpacing.xl),
                       VetenTextField(
-                        label: 'Nomor HP atau Email',
-                        hint: 'Masukkan nomor HP atau email',
-                        controller: _phoneCtrl,
+                        label: 'SIP Username (Ekstensi)',
+                        hint: 'Masukkan SIP Username (Misal: 101)',
+                        controller: _emailCtrl,
+                        keyboardType: TextInputType.number,
                         validator: (v) => v == null || v.isEmpty
-                            ? 'Tidak boleh kosong'
+                            ? 'Username SIP tidak boleh kosong'
                             : null,
                       ),
                       const SizedBox(height: AppSpacing.lg),

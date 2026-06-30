@@ -29,159 +29,211 @@ import '../../screens/settings/blocked_users_screen.dart';
 import '../../screens/settings/friend_requests_screen.dart';
 import '../../screens/main_shell.dart';
 
+// ============================================================
+// UNIVERSAL TRANSITION — ringan, smooth, berlaku semua halaman
+// ============================================================
+
+/// Transisi universal: fade ringan + slide micro dari bawah.
+/// Sangat ringan, tidak berat di GPU, terasa native.
+Page<void> _page({required LocalKey key, required Widget child}) {
+  return CustomTransitionPage<void>(
+    key: key,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 320),
+    reverseTransitionDuration: const Duration(milliseconds: 250),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      // Halaman baru: naik sedikit dari bawah + fade in
+      final enter = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+      final slideIn = Tween<Offset>(
+        begin: const Offset(0.0, 0.04),  // Micro-slide: hanya 4% tinggi layar
+        end: Offset.zero,
+      ).animate(enter);
+      final fadeIn = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: animation, curve: const Interval(0.0, 0.7, curve: Curves.easeOut)),
+      );
+
+      // Halaman lama: sedikit scale down + fade (efek depth)
+      final leave = CurvedAnimation(parent: secondaryAnimation, curve: Curves.easeInCubic);
+      final scaleOut = Tween<double>(begin: 1.0, end: 0.97).animate(leave);
+      final fadeOut = Tween<double>(begin: 1.0, end: 0.88).animate(leave);
+
+      return FadeTransition(
+        opacity: fadeOut,
+        child: ScaleTransition(
+          scale: scaleOut,
+          child: SlideTransition(
+            position: slideIn,
+            child: FadeTransition(
+              opacity: fadeIn,
+              child: child,
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
+/// Transisi horizontal — khusus untuk auth (Login ↔ Register)
+Page<void> _sidePage({
+  required LocalKey key,
+  required Widget child,
+  bool fromRight = true,
+}) {
+  return CustomTransitionPage<void>(
+    key: key,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 320),
+    reverseTransitionDuration: const Duration(milliseconds: 250),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final slide = Tween<Offset>(
+        begin: Offset(fromRight ? 0.2 : -0.2, 0.0),
+        end: Offset.zero,
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
+      final fade = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(parent: animation, curve: Curves.easeOut),
+      );
+      return SlideTransition(
+        position: slide,
+        child: FadeTransition(opacity: fade, child: child),
+      );
+    },
+  );
+}
+
+// ============================================================
+// ROUTER
+// ============================================================
+
 final GoRouter appRouter = GoRouter(
   initialLocation: '/splash',
   routes: [
+
+    // ─── SPLASH & ONBOARDING ───────────────────────────────
     GoRoute(
       path: '/splash',
-      builder: (context, state) => const SplashScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const SplashScreen()),
     ),
     GoRoute(
       path: '/onboarding',
-      builder: (context, state) => const OnboardingScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const OnboardingScreen()),
     ),
+
+    // ─── AUTH ──────────────────────────────────────────────
     GoRoute(
       path: '/login',
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
-        child: const LoginScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: animation.drive(Tween(
-              begin: const Offset(-0.3, 0.0),
-              end: Offset.zero,
-            ).chain(CurveTween(curve: Curves.easeOutCubic))),
-            child: FadeTransition(
-              opacity: animation.drive(CurveTween(curve: Curves.easeIn)),
-              child: child,
-            ),
-          );
-        },
-      ),
+      pageBuilder: (c, s) => _sidePage(key: s.pageKey, child: const LoginScreen(), fromRight: false),
     ),
     GoRoute(
       path: '/register',
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
-        child: const RegisterScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: animation.drive(Tween(
-              begin: const Offset(0.3, 0.0),
-              end: Offset.zero,
-            ).chain(CurveTween(curve: Curves.easeOutCubic))),
-            child: FadeTransition(
-              opacity: animation.drive(CurveTween(curve: Curves.easeIn)),
-              child: child,
-            ),
-          );
-        },
-      ),
+      pageBuilder: (c, s) => _sidePage(key: s.pageKey, child: const RegisterScreen(), fromRight: true),
     ),
     GoRoute(
       path: '/otp',
-      builder: (context, state) => OtpScreen(
-        phone: state.uri.queryParameters['phone'] ?? '',
+      pageBuilder: (c, s) => _page(
+        key: s.pageKey,
+        child: OtpScreen(phone: s.uri.queryParameters['phone'] ?? ''),
       ),
     ),
+
+    // ─── MAIN SHELL (Bottom nav tabs) ──────────────────────
     ShellRoute(
       builder: (context, state, child) => MainShell(child: child),
       routes: [
-        GoRoute(
-          path: '/home',
-          builder: (context, state) => const ChatListScreen(),
-        ),
-        GoRoute(
-          path: '/calls',
-          builder: (context, state) => const CallLogScreen(),
-        ),
-        GoRoute(
-          path: '/contacts',
-          builder: (context, state) => const ContactsScreen(),
-        ),
-        GoRoute(
-          path: '/profile',
-          builder: (context, state) => const ProfileScreen(),
-        ),
+        GoRoute(path: '/home',     builder: (c, s) => const ChatListScreen()),
+        GoRoute(path: '/calls',    builder: (c, s) => const CallLogScreen()),
+        GoRoute(path: '/contacts', builder: (c, s) => const ContactsScreen()),
+        GoRoute(path: '/profile',  builder: (c, s) => const ProfileScreen()),
       ],
     ),
+
+    // ─── CHAT ──────────────────────────────────────────────
     GoRoute(
       path: '/chat/:contactId',
-      builder: (context, state) => ChatRoomScreen(
-        contactId: state.pathParameters['contactId'] ?? '',
+      pageBuilder: (c, s) => _page(
+        key: s.pageKey,
+        child: ChatRoomScreen(contactId: s.pathParameters['contactId'] ?? ''),
       ),
     ),
     GoRoute(
       path: '/chat-search',
-      builder: (context, state) => const ChatSearchScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const ChatSearchScreen()),
     ),
+
+    // ─── CALLS ─────────────────────────────────────────────
     GoRoute(
       path: '/incoming-call',
-      builder: (context, state) => const IncomingCallScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const IncomingCallScreen()),
     ),
     GoRoute(
       path: '/voice-call/:contactId',
-      builder: (context, state) => VoiceCallScreen(
-        contactId: state.pathParameters['contactId'] ?? '',
+      pageBuilder: (c, s) => _page(
+        key: s.pageKey,
+        child: VoiceCallScreen(contactId: s.pathParameters['contactId'] ?? ''),
       ),
     ),
     GoRoute(
       path: '/video-call/:contactId',
-      builder: (context, state) => VideoCallScreen(
-        contactId: state.pathParameters['contactId'] ?? '',
+      pageBuilder: (c, s) => _page(
+        key: s.pageKey,
+        child: VideoCallScreen(contactId: s.pathParameters['contactId'] ?? ''),
       ),
     ),
     GoRoute(
       path: '/group-voice-call',
-      builder: (context, state) => const GroupVoiceCallScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const GroupVoiceCallScreen()),
     ),
     GoRoute(
       path: '/group-video-call',
-      builder: (context, state) => const GroupVideoCallScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const GroupVideoCallScreen()),
     ),
+
+    // ─── CONTACTS ──────────────────────────────────────────
     GoRoute(
       path: '/select-members',
-      builder: (context, state) => const SelectMembersScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const SelectMembersScreen()),
     ),
     GoRoute(
       path: '/group-info',
-      builder: (context, state) => const GroupInfoScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const GroupInfoScreen()),
     ),
+
+    // ─── PROFILE & SETTINGS ────────────────────────────────
     GoRoute(
       path: '/edit-profile',
-      builder: (context, state) => const EditProfileScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const EditProfileScreen()),
     ),
     GoRoute(
       path: '/privacy',
-      builder: (context, state) => const PrivacyScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const PrivacyScreen()),
     ),
     GoRoute(
       path: '/notifications',
-      builder: (context, state) => const NotificationsScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const NotificationsScreen()),
     ),
     GoRoute(
       path: '/tts-settings',
-      builder: (context, state) => const TtsSettingsScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const TtsSettingsScreen()),
     ),
     GoRoute(
       path: '/security',
-      builder: (context, state) => const SecurityScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const SecurityScreen()),
     ),
     GoRoute(
       path: '/app-lock',
-      builder: (context, state) => const AppLockScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const AppLockScreen()),
     ),
     GoRoute(
       path: '/storage',
-      builder: (context, state) => const StorageScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const StorageScreen()),
     ),
     GoRoute(
       path: '/blocked-users',
-      builder: (context, state) => const BlockedUsersScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const BlockedUsersScreen()),
     ),
     GoRoute(
       path: '/friend-requests',
-      builder: (context, state) => const FriendRequestsScreen(),
+      pageBuilder: (c, s) => _page(key: s.pageKey, child: const FriendRequestsScreen()),
     ),
   ],
 );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:google_fonts/google_fonts.dart' hide Config;
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_spacing.dart';
 import '../data/models/chat_model.dart';

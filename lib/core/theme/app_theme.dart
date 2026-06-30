@@ -159,7 +159,7 @@ class AppTheme {
           color: AppColors.onSurfaceVariant,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.surface,
         elevation: 0,
         margin: EdgeInsets.zero,
